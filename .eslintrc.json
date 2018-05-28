@@ -1,0 +1,25 @@
+{
+  "parser": "babel-eslint",
+  "extends": ["standard"],
+  "parserOptions": {
+    "ecmaVersion": 7,
+    "sourceType": "module"
+  },
+  "env": {
+    "es6": true
+  },
+  "globals": {
+    "describe": true,
+    "it": true,
+    "before": true,
+    "after": true,
+    "beforeEach": true,
+    "afterEach": true
+  },
+  "rules": {
+    "indent": ["warn", 2, { "SwitchCase": 1 }],
+    "no-unused-vars": 1,
+    "semi": [2, "never"],
+    "space-before-function-paren": [2, "never"]
+  }
+}
