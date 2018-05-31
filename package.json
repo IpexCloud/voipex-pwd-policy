@@ -24,7 +24,7 @@
     "mocha": "5.1.1"
   },
   "dependencies": {
-    "password-checker": "^0.2.4",
+    "password-checker": "^0.2.4"
   },
   "engines": {
     "node": ">=8.11.1"
