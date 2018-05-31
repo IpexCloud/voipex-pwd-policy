@@ -1,5 +1,3 @@
-const fs = require('fs')
-const path = require('path')
 const words = require('./common-passwords.js')
 var commonPasswords = {}
 var i, word, len
