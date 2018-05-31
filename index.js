@@ -1,7 +1,7 @@
 const Checker = require('password-checker')
 const defaultMellt = require('./src/mellt.js')
 
-class IpexPasswordChecker {
+class PasswordPolicy {
   constructor(checker = new Checker(), mellt = defaultMellt) {
     this.lowerLetters = 'abcdefghijklmnopqrstuvwxyz'
     this.upperLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'

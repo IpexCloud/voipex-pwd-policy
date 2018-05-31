@@ -1,11 +1,7 @@
 const fs = require('fs')
 const path = require('path')
-
-var data = fs
-  .readFileSync(path.join(__dirname, '/common-passwords.txt'), 'UTF-8')
-  .toString()
+const words = require('./common-passwords.js')
 var commonPasswords = {}
-var words = data.split('\n')
 var i, word, len
 for (i = 0, len = words.length; i < len; i++) {
   word = words[i]
