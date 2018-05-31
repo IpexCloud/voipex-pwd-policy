@@ -198,4 +198,4 @@ class PasswordPolicy {
   }
 }
 
-module.exports = IpexPasswordChecker
+module.exports = PasswordPolicy
