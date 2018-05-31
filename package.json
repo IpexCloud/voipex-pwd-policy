@@ -1,12 +1,16 @@
 {
   "name": "voipex-password-policy",
-  "version": "0.0.5",
+  "version": "0.0.7",
   "description": "VOIPEX password policy checker",
   "main": "index.js",
   "scripts": {
     "test": "mocha tests"
   },
-  "keywords": ["password", "check", "checker"],
+  "keywords": [
+    "password",
+    "check",
+    "checker"
+  ],
   "author": "Jan Opravil",
   "license": "GPL-3.0-or-later",
   "repository": {
