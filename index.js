@@ -155,16 +155,9 @@ class PasswordPolicy {
     this.errors = []
     this.password = password
 
-    for (const i in this.rules) {
-      const err = this.rules[i].method()
-      const isError = err !== null
-
-      this.rules[i].failed = isError
-
-      if (isError) {
-        this.errors.push(err)
-        this.rules[i].error_message = err.message
-      }
+    const result = this.checker.check(password)
+    if (!result) {
+      this.errors.push(new Error(''))
     }
 
     if (this.upper) {
