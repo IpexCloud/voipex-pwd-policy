@@ -52,12 +52,12 @@ class PasswordPolicy {
       throw new Error('Parameter has to be integer')
     }
     this.minimumLength = Math.floor(minimumLength)
-    if (this.minimumLength === 0) {
-      if (this.validators.minimumLength) {
-        delete this.validators.minimumLength
-      }
-    } else {
+    if (this.minimumLength !== 0) {
       this.addValidator('minimalLength', this.validateMinimalLength)
+      return
+    }
+    if (this.validators.minimumLength) {
+      delete this.validators.minimumLength
     }
   }
 
@@ -66,12 +66,12 @@ class PasswordPolicy {
       throw new Error('Parameter has to be integer')
     }
     this.maximumLength = Math.floor(maximumLength)
-    if (maximumLength === 0) {
-      if (this.valiadors.maximumLength) {
-        delete this.valiadors.maximumLength
-      }
-    } else {
+    if (maximumLength !== 0) {
       this.addValidator('maximalLength', this.validateMaximalLength)
+      return
+    }
+    if (this.valiadors.maximumLength) {
+      delete this.valiadors.maximumLength
     }
   }
 
@@ -114,12 +114,12 @@ class PasswordPolicy {
       throw new Error('Parameter has to be number')
     }
     this.minimumTimeToCrack = Math.floor(days)
-    if (this.minimumTimeToCrack === 0) {
-      if (this.validators.minimumTimeToCrack) {
-        delete this.validators.minimumTimeToCrack
-      }
-    } else {
+    if (this.minimumTimeToCrack !== 0) {
       this.addValidator('minimalTimeToCrack', this.validateMinimalTimeToCrack)
+      return
+    }
+    if (this.validators.minimumTimeToCrack) {
+      delete this.validators.minimumTimeToCrack
     }
   }
 
@@ -128,15 +128,15 @@ class PasswordPolicy {
       throw new Error('Parameter has to be number')
     }
     this.minimumNumberOfUpperLetters = Math.floor(numberOfUpperLetters)
-    if (this.minimumNumberOfUpperLetters === 0) {
-      if (this.validators.minimumNumberOfUpperLetters) {
-        delete this.validators.minimumNumberOfUpperLetters
-      }
-    } else {
+    if (this.minimumNumberOfUpperLetters !== 0) {
       this.addValidator(
         'minimalNumberOfUpperLetters',
         this.validateMinimalNumberOfUpperLetters
       )
+      return
+    }
+    if (this.validators.minimumNumberOfUpperLetters) {
+      delete this.validators.minimumNumberOfUpperLetters
     }
   }
 
@@ -167,10 +167,10 @@ class PasswordPolicy {
     }
     if (active) {
       this.addValidator('allowedSymbols', this.validateSymbols)
-    } else {
-      if (this.valiadors.validateSymbols) {
-        delete this.valiadors.validateSymbols
-      }
+      return
+    }
+    if (this.valiadors.validateSymbols) {
+      delete this.valiadors.validateSymbols
     }
   }
 
@@ -180,10 +180,10 @@ class PasswordPolicy {
     }
     if (active) {
       this.addValidator('allowedLetters', this.validateLetters)
-    } else {
-      if (this.valiadors.validateLetters) {
-        delete this.valiadors.validateLetters
-      }
+      return
+    }
+    if (this.valiadors.validateLetters) {
+      delete this.valiadors.validateLetters
     }
   }
 
@@ -193,10 +193,11 @@ class PasswordPolicy {
     }
     if (active) {
       this.addValidator('allowedNumbers', this.validateNumbers)
-    } else {
-      if (this.valiadors.validateNumbers) {
-        delete this.valiadors.validateNumbers
-      }
+      return
+    }
+
+    if (this.valiadors.validateNumbers) {
+      delete this.valiadors.validateNumbers
     }
   }
 
