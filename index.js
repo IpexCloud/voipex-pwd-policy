@@ -1,193 +1,288 @@
-const Checker = require('password-checker')
-const defaultMellt = require('./src/mellt.js')
+const R = require('ramda')
+
+const trees = require('./src/trees.mod.js')
+const words = require('./src/norvig-10000.mod.js')
+const names = require('./src/all-names.mod.js')
+const passwords = require('./src/passwords-10000.mod.js')
+const mellt = require('./src/mellt.js')
+
+RegExp.escape = function(string) {
+  return string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')
+}
 
 class PasswordPolicy {
-  constructor(checker = new Checker(), mellt = defaultMellt) {
-    this.lowerLetters = 'abcdefghijklmnopqrstuvwxyz'
-    this.upperLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+  constructor() {
+    // Holds errors from the last check
+    this.errors = []
+    this.password = null
+    this.validators = {}
+    // Defaults
+    this.allowedLowerLetters = 'abcdefghijklmnopqrstuvwxyz'
+    this.allowedUpperLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    this.allowedLetters = this.allowedLowerLetters + this.allowedUpperLetters
+    this.allowedNumbers = '0123456789'
+    this.allowedSymbols = '_-!"?$%^&*()+={}[]:;@\'~#|<>,.?\\/ '
+    this.symbols = '_-!"?$%^&*()+={}[]:;@\'~#|<>,.?\\/ '
+    this.letters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    this.digits = '0123456789'
+    this.words = words
+    this.names = names
+    this.passwords = passwords
+    this.wordsTree = trees.arrayToTree(this.words, true, 3)
+    this.namesTree = trees.arrayToTree(this.names, true, 3)
+    this.passwordsTree = trees.arrayToTree(this.passwords, true, 3)
+    this.minimumLength = 0
+    this.maximumLength = 0
+
     this.specialSymbolsUser = ',.!#@*'
     this.specialSymbolsSip = '-.*()%'
-    this.penetration = '.*'
-    this.checker = checker
-    this.mellt = mellt
-    this.minTimeToCrack = 0
-    this.checker.allowed_symbols = '_-!"?$%^&*()+={}[]:;@\'~#|<>,.?\\/ '
-    this.checker.min_length = 0
-    this.checker.max_length = 0
-    this.upper = 0
+    this.specialSymbolsPenetration = '.*'
+    this.minimumTimeToCrack = 0
+    this.minimumNumberOfUpperLetters = 0
   }
 
-  /**
-   * Set minimal password length
-   * @param {number} length
-   */
-  setMinLength(length) {
-    this.checker.min_length = length
+  addValidator(name, validator) {
+    this.validators[name] = {
+      validate: validator
+    }
   }
 
-  /**
-   * Set maximal password length
-   * @param {number} length
-   */
-  setMaxLength(length) {
-    this.checker.max_length = length
+  setMinimumLength(minimumLength) {
+    this.minimumLength = minimumLength
+    if (minimumLength === 0) {
+      delete this.validators.minimumLength
+    } else {
+      this.addValidator('minimalLength', this.validateMinimalLength)
+    }
   }
 
-  /**
-   * Set allowed letters password can contain
-   * @param {string} letters
-   */
-  setAllowedLetters(upperLetters = '', lowerLetters = '') {
-    this.lowerLetters = lowerLetters
-    this.upperLetters = upperLetters
-    this.checker.allowed_letters = this.upperLetters + this.lowerLetters
+  setMaximumLength(maximumLength) {
+    this.maximumLength = maximumLength
+    if (maximumLength === 0) {
+      delete this.valiadors.maximumLength
+    } else {
+      this.addValidator('maximalLength', this.validateMaximalLength)
+    }
   }
 
-  /**
-   * Set allowed numbers password can contain
-   * @param {string} numbers
-   */
+  setAllowedUpperLetter(upperLetters) {
+    if (upperLetters) {
+      this.allowedUpperLetters = upperLetters.toUpperCase()
+    } else {
+      this.allowedUpperLetters = ''
+    }
+    this.allowedLetters = this.allowedLowerLetters + this.allowedUpperLetters
+  }
+
+  setAllowedLowerLetter(lowerLetters) {
+    if (lowerLetters) {
+      this.allowedLowerLetters = lowerLetters.toLowerCase()
+    } else {
+      this.allowedLowerLetters = ''
+    }
+    this.allowedLetters = this.allowedLowerLetters + this.allowedUpperLetters
+  }
+
   setAllowedNumbers(numbers) {
-    this.checker.allowed_numbers = numbers
-  }
-
-  /**
-   * Set allowed symbols password can contain
-   * @param {string} symbols
-   */
-  setAllowedSpecialSymbols(symbols) {
-    this.checker.allowed_symbols = symbols
-  }
-
-  /**
-   * Should check that the password only has letters from allowed_letters in it
-   * @param  {boolean} active true|false
-   */
-  checkLetters(active) {
-    this.checker.checkLetters(active)
-  }
-
-  /**
-   * Should check that the password has letter in it
-   * @param  {boolean} active true|false
-   */
-  requireLetters(active) {
-    this.checker.requireLetters(active)
-  }
-
-  /**
-   * Should check that the password only has numbers from allowed_numbers in it
-   * @param  {boolean} active true|false
-   */
-  checkNumbers(active) {
-    this.checker.checkNumbers(active)
-  }
-
-  /**
-   * Should check that the password has numbers in it
-   * @param  {boolean} active true|false
-   */
-  requireNumbers(active) {
-    this.checker.requireNumbers(active)
-  }
-
-  /**
-   * Should check that the password only has symbols from allowed_letters in it
-   * @param  {boolean} active true|false
-   */
-  checkSymbols(active) {
-    this.checker.checkSymbols(active)
-  }
-
-  /**
-   * Should check that the password has symbols in it
-   * @param  {boolean} active true|false
-   */
-  requireSymbols(active) {
-    this.checker.requireSymbols(active)
-  }
-  /**
-   * Minimal number of day days password to be cracked
-   * @param  {number} days
-   */
-  setMinTimeToCrack(days) {
-    this.minTimeToCrack = days
-  }
-
-  /**
-   * Minimal number of upper letters
-   * @param  {number} length
-   */
-  setUpper(length) {
-    this.upper = length
-  }
-
-  /**
-   * Which default policy to set
-   * @param  {string} policy user | sip
-   */
-  setDefaultPolicy(policy) {
-    this.checker.requireLetters(true)
-    this.checker.requireNumbers(false)
-    this.checker.requireSymbols(false)
-    this.checker.checkLetters(true)
-    this.checker.checkNumbers(true)
-    this.checker.checkSymbols(true)
-    this.upper = 1
-
-    switch (policy) {
-      case 'user':
-        this.upper = 1
-        this.minTimeToCrack = 14
-        this.checker.min_length = 10
-        this.checker.allowed_symbols = this.specialSymbolsUser
-        break
-      case 'sip':
-        this.checker.min_length = 8
-        this.checker.allowed_symbols = this.specialSymbolsSip
-        break
-      default:
-        throw new Error(`Policy ${policy} is not allowed`)
+    if (numbers) {
+      this.allowedNumbers = numbers
+    } else {
+      this.allowedNumbers = ''
     }
   }
 
-  check(password, cb) {
-    this.errors = []
-    this.password = password
-
-    const result = this.checker.check(password)
-    if (!result) {
-      this.errors.push(new Error(''))
+  setAllowedSymbols(symbols) {
+    if (symbols) {
+      this.allowedSymbols = symbols
+    } else {
+      this.allowedSymbols = ''
     }
+  }
 
-    if (this.upper) {
-      const size = this.upperLetters
-        .split('')
-        .filter(letter => password.includes(letter))
-      if (this.upper >= size) {
-        this.errors.push(
-          new Error(
-            `Password does not contain required number of upper letters (${
-              this.upper
-            })`
-          )
-        )
-      }
+  setMinimumTimeToCrack(days) {
+    if (days && days !== 0) {
+      this.minimumTimeToCrack = days
+      this.addValidator('minimalTimeToCrack', this.validateMinimalTimeToCrack)
+    } else {
+      this.minimumTimeToCrack = 0
+      delete this.validators.minimumTimeToCrack
     }
+  }
 
-    if (
-      this.minTimeToCrack &&
-      this.mellt.CheckPassword(password) < this.minTimeToCrack
-    ) {
-      this.errors.push(
-        new Error(`Password can be cracked sooner than ${this.minTimeToCrack}`)
+  setMinimumNumberOfUpperLetters(numberOfUpperLetters) {
+    if (numberOfUpperLetters === 0) {
+      this.minimumNumberOfUpperLetters = 0
+      delete this.validators.minimumNumberOfUpperLetters
+    } else {
+      this.minimumNumberOfUpperLetters = numberOfUpperLetters
+      this.addValidator(
+        'minimalNumberOfUpperLetters',
+        this.validateMinimalNumberOfUpperLetters
       )
     }
+  }
 
-    if (cb) {
-      cb(this.errors.length ? this.errors : null)
+  checkSymbols(active) {
+    if (active) {
+      this.addValidator('allowedSymbols', this.validateSymbols)
+    } else {
+      if (this.valiadors.validateSymbols) {
+        delete this.valiadors.validateSymbols
+      }
     }
+  }
+
+  checkLetters(active) {
+    if (active) {
+      this.addValidator('allowedLetters', this.validateLetters)
+    } else {
+      if (this.valiadors.validateLetters) {
+        delete this.valiadors.validateLetters
+      }
+    }
+  }
+
+  checkNumbers(active) {
+    if (active) {
+      this.addValidator('allowedNumbers', this.validateNumbers)
+    } else {
+      if (this.valiadors.validateNumbers) {
+        delete this.valiadors.validateNumbers
+      }
+    }
+  }
+
+  validate(password) {
+    this.password = password || ''
+    this.errors = Object.keys(this.validators).reduce((errors, validator) => {
+      const error = this.validators[validator].validate(this)
+      if (error !== null) {
+        errors.push(error)
+      }
+      return errors
+    }, [])
+
     return !this.errors.length
+  }
+
+  validateMinimalLength(self) {
+    if (self.password.length < self.minimumLength) {
+      return {
+        validator: 'MinimalLength',
+        expected: self.minimumLength,
+        actual: self.password.length
+      }
+    }
+    return null
+  }
+
+  validateMaximalLength(self) {
+    if (self.password.length > self.maximumLength) {
+      return {
+        validator: 'MaximalLength',
+        expected: self.maximumLength,
+        actual: self.password.length
+      }
+    }
+    return null
+  }
+
+  validateMinimalNumberOfUpperLetters(self) {
+    const size = self.allowedUpperLetters
+      .split('')
+      .filter(letter => self.password.includes(letter))
+    if (size.length < self.minimumNumberOfUpperLetters) {
+      return {
+        validator: 'minimumNumberOfUpperLetters',
+        expected: self.minimumNumberOfUpperLetters,
+        actual: size
+      }
+    }
+    return null
+  }
+
+  validateMinimalTimeToCrack(self) {
+    const days = mellt.CheckPassword(self.password)
+    if (days < self.minimumTimeToCrack) {
+      return {
+        validator: 'MinimumTimeToCrac',
+        expected: self.minimumTimeToCrack,
+        actual: days
+      }
+    }
+    return null
+  }
+
+  validateSymbols(self) {
+    let string = R.replace(
+      new RegExp('[' + self.letters + ']', 'g'),
+      '',
+      self.password
+    )
+    string = R.replace(new RegExp('[' + self.digits + ']', 'g'), '', string)
+    const size = string
+      .split('')
+      .filter(letter => !self.allowedSymbols.includes(letter)).length
+    if (size) {
+      return {
+        validator: 'Symbols',
+        expected: 0,
+        actual: size
+      }
+    }
+    return null
+  }
+
+  validateNumbers(self) {
+    let string = R.replace(
+      new RegExp('[' + self.letters + ']', 'g'),
+      '',
+      self.password
+    )
+    string = R.replace(
+      new RegExp('[' + RegExp.escape(self.symbols) + ']', 'g'),
+      '',
+      string
+    )
+    const size = string
+      .split('')
+      .filter(digit => !self.allowedNumbers.includes(digit)).length
+    if (size) {
+      return {
+        validator: 'Digits',
+        expected: 0,
+        actual: size
+      }
+    }
+    return null
+  }
+
+  validateLetters(self) {
+    let string = R.replace(
+      new RegExp('[' + self.digits + ']', 'g'),
+      '',
+      self.password
+    )
+    string = R.replace(
+      new RegExp('[' + RegExp.escape(self.symbols) + ']', 'g'),
+      '',
+      string
+    )
+    const size = string
+      .split('')
+      .filter(letter => !self.allowedLetters.includes(letter)).length
+    if (size) {
+      return {
+        validator: 'Letters',
+        expected: 0,
+        actual: size
+      }
+    }
+    return null
+  }
+
+  getErrors() {
+    return this.errors
   }
 }
 

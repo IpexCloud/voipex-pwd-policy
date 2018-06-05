@@ -2,7 +2,7 @@ const assert = require('assert')
 const Checker = require('../')
 const checker = new Checker()
 
-describe(`Test of policy user`, () => {
+describe.skip(`Test of policy user`, () => {
   it(`correct password`, () => {
     checker.setDefaultPolicy('user')
     const actual = checker.check('A1aaaaaaaa')
