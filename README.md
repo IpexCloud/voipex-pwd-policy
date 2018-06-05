@@ -6,9 +6,13 @@ Voipex passwpord policy is library consist from another libraries which were put
 
 ## Setters
 
-### setDefaultPolicy (string)
+### defaultPolicy (string)
 
 Set default policy used by IPEX a.s.
+
+```
+policy.defaultPolicy = 'sip'
+```
 
 #### Parameters
 
@@ -16,7 +20,7 @@ Set default policy used by IPEX a.s.
   - default value: not set
   - allowed value - ['sip', 'users']
 
-### setMinimumLength (int)
+### minimumLength (int)
 
 Minimal length of password to be valid. If value is 0 validator is not applied
 
@@ -26,7 +30,11 @@ Minimal length of password to be valid. If value is 0 validator is not applied
   - default value: 0
   - when value is 0 validator is not used
 
-### setMaximumLength (int)
+```
+policy.minimumLength = 1
+```
+
+### maximumLength (int)
 
 Maximal length of password to be valid. Default = 0 validotor is not used
 
@@ -36,7 +44,11 @@ Maximal length of password to be valid. Default = 0 validotor is not used
   - default value: 0
   - when value is 0 validator is not used
 
-### setAllowedUpperLetter (string)
+```
+policy.maximumLength = 1
+```
+
+### allowedUpperLetter (string)
 
 Set of uppers letters which password can only contain.
 
@@ -45,7 +57,11 @@ Set of uppers letters which password can only contain.
 - upperLetters
   - default value: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
-### setAllowedLowerLetter (string)
+```
+policy.allowedUpperLetter = 'A'
+```
+
+### allowedLowerLetter (string)
 
 Set of lower letters which password can only contain
 
@@ -54,7 +70,11 @@ Set of lower letters which password can only contain
 - lowerLetters
   - default value: 'abcdefghijklmnopqrstuvwxyz'
 
-### setAlloweNumbers (string)
+```
+policy.allowedLowerLetter = 'a'
+```
+
+### alloweNumbers (string)
 
 Set of digits which password can only contain.
 
@@ -63,7 +83,11 @@ Set of digits which password can only contain.
 - numbers
   - default value: '0123456789'
 
-### setAlloweSymbols (string)
+```
+policy.alloweNumbers = '0'
+```
+
+### alloweSymbols (string)
 
 Set of symbols which password can only contain
 
@@ -72,7 +96,11 @@ Set of symbols which password can only contain
 - symbols -
   - default value: '\_-!"?$%^&\*()+={}[]:;@\'~#|<>,.?\\/ '
 
-### setMinimumTimeToCrack (int)
+```
+policy.alloweSymbols = '-'
+```
+
+### minimumTimeToCrack (int)
 
 Minimal time for which password could't be cracked
 
@@ -82,9 +110,13 @@ Minimal time for which password could't be cracked
   - default value: 0
   - when value is 0 validator is not used
 
-### setMinimumNumberOfUpperLetters (int)
+```
+policy.minimumTimeToCrack = 1
+```
 
-minimal count of upper letters in password to be valid
+### minimumNumberOfUpperLetters (int)
+
+Minimal count of upper letters in password to be valid
 
 #### Parameters
 
@@ -92,11 +124,19 @@ minimal count of upper letters in password to be valid
   - default value: 0
   - when value is 0 validator is not used
 
+```
+policy.numberOfUpperLetters = 1
+```
+
 ## Getters
 
-### getErrors: array
+### errors: array
 
-- return list of errors in validators
+Return list of errors in validators
+
+```
+console.log(policy.errors)
+```
 
 ## Validators
 
