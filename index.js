@@ -47,100 +47,92 @@ class PasswordPolicy {
     }
   }
 
-  setMinimumLength(minimumLength) {
+  set minimumLength(minimumLength) {
     if (typeof minimumLength !== 'number') {
       throw new Error('Parameter has to be integer')
     }
     this.minimumLength = Math.floor(minimumLength)
-    if (minimumLength === 0) {
-      delete this.validators.minimumLength
+    if (this.minimumLength === 0) {
+      if (this.validators.minimumLength) {
+        delete this.validators.minimumLength
+      }
     } else {
       this.addValidator('minimalLength', this.validateMinimalLength)
     }
   }
 
-  setMaximumLength(maximumLength) {
+  set maximumLength(maximumLength) {
     if (typeof minimumLength !== 'number') {
       throw new Error('Parameter has to be integer')
     }
     this.maximumLength = Math.floor(maximumLength)
     if (maximumLength === 0) {
-      delete this.valiadors.maximumLength
+      if (this.valiadors.maximumLength) {
+        delete this.valiadors.maximumLength
+      }
     } else {
       this.addValidator('maximalLength', this.validateMaximalLength)
     }
   }
 
-  setAllowedUpperLetter(upperLetters) {
+  set allowedUpperLetter(upperLetters) {
     if (typeof upperLetters !== 'string') {
       throw new Error('Parameter has to be string')
     }
-    if (upperLetters) {
-      this.allowedUpperLetters = upperLetters.toUpperCase()
-    } else {
-      this.allowedUpperLetters = ''
-    }
+
+    this.allowedUpperLetters = upperLetters.toUpperCase()
     this.allowedLetters = this.allowedLowerLetters + this.allowedUpperLetters
   }
 
-  setAllowedLowerLetter(lowerLetters) {
+  set allowedLowerLetter(lowerLetters) {
     if (typeof lowerLetters !== 'string') {
       throw new Error('Parameter has to be string')
     }
-    if (lowerLetters) {
-      this.allowedLowerLetters = lowerLetters.toLowerCase()
-    } else {
-      this.allowedLowerLetters = ''
-    }
+
+    this.allowedLowerLetters = lowerLetters.toLowerCase()
     this.allowedLetters = this.allowedLowerLetters + this.allowedUpperLetters
   }
 
-  setAllowedNumbers(numbers) {
+  set allowedNumbers(numbers) {
     if (typeof numbers !== 'string') {
       throw new Error('Parameter has to be string')
     }
-    if (numbers) {
-      this.allowedNumbers = numbers
-    } else {
-      this.allowedNumbers = ''
-    }
+
+    this.allowedNumbers = numbers
   }
 
-  setAllowedSymbols(symbols) {
+  set allowedSymbols(symbols) {
     if (typeof symbols !== 'string') {
       throw new Error('Parameter has to be string')
     }
-    if (symbols) {
-      this.allowedSymbols = symbols
-    } else {
-      this.allowedSymbols = ''
-    }
+
+    this.allowedSymbols = symbols
   }
 
-  setMinimumTimeToCrack(days) {
+  set minimumTimeToCrack(days) {
     if (typeof days !== 'number') {
       throw new Error('Parameter has to be number')
     }
-    days = Math.floor(days)
-    if (days && days !== 0) {
-      this.minimumTimeToCrack = days
+    this.minimumTimeToCrack = Math.floor(days)
+    if (this.minimumTimeToCrack === 0) {
+      if (this.validators.minimumTimeToCrack) {
+        delete this.validators.minimumTimeToCrack
+      }
+    } else {
       this.addValidator('minimalTimeToCrack', this.validateMinimalTimeToCrack)
-    } else {
-      this.minimumTimeToCrack = 0
-      delete this.validators.minimumTimeToCrack
     }
   }
 
-  setMinimumNumberOfUpperLetters(numberOfUpperLetters) {
-    if (typeof days !== 'number') {
+  set minimumNumberOfUpperLetters(numberOfUpperLetters) {
+    if (typeof numberOfUpperLetters !== 'number') {
       throw new Error('Parameter has to be number')
     }
-    numberOfUpperLetters = Math.floor(numberOfUpperLetters)
-    if (numberOfUpperLetters === 0) {
-      this.minimumNumberOfUpperLetters = 0
-      delete this.validators.minimumNumberOfUpperLetters
+    this.minimumNumberOfUpperLetters = Math.floor(numberOfUpperLetters)
+    if (this.minimumNumberOfUpperLetters === 0) {
+      if (this.validators.minimumNumberOfUpperLetters) {
+        delete this.validators.minimumNumberOfUpperLetters
+      }
     } else {
-      this.minimumNumberOfUpperLetters = numberOfUpperLetters
       this.addValidator(
         'minimalNumberOfUpperLetters',
         this.validateMinimalNumberOfUpperLetters
@@ -148,7 +140,7 @@ class PasswordPolicy {
     }
   }
 
-  setDefaultPolicy(policy) {
+  set defaultPolicy(policy) {
     this.checkLetters(true)
     this.checkNumbers(true)
     this.checkSymbols(true)
@@ -337,7 +329,7 @@ class PasswordPolicy {
     return null
   }
 
-  getErrors() {
+  get errors() {
     return this.errors
   }
 }
