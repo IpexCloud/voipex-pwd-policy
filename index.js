@@ -48,7 +48,10 @@ class PasswordPolicy {
   }
 
   setMinimumLength(minimumLength) {
-    this.minimumLength = minimumLength
+    if (typeof minimumLength !== 'number') {
+      throw new Error('Parameter has to be integer')
+    }
+    this.minimumLength = Math.floor(minimumLength)
     if (minimumLength === 0) {
       delete this.validators.minimumLength
     } else {
@@ -57,7 +60,10 @@ class PasswordPolicy {
   }
 
   setMaximumLength(maximumLength) {
-    this.maximumLength = maximumLength
+    if (typeof minimumLength !== 'number') {
+      throw new Error('Parameter has to be integer')
+    }
+    this.maximumLength = Math.floor(maximumLength)
     if (maximumLength === 0) {
       delete this.valiadors.maximumLength
     } else {
@@ -66,6 +72,9 @@ class PasswordPolicy {
   }
 
   setAllowedUpperLetter(upperLetters) {
+    if (typeof upperLetters !== 'string') {
+      throw new Error('Parameter has to be string')
+    }
     if (upperLetters) {
       this.allowedUpperLetters = upperLetters.toUpperCase()
     } else {
@@ -75,6 +84,9 @@ class PasswordPolicy {
   }
 
   setAllowedLowerLetter(lowerLetters) {
+    if (typeof lowerLetters !== 'string') {
+      throw new Error('Parameter has to be string')
+    }
     if (lowerLetters) {
       this.allowedLowerLetters = lowerLetters.toLowerCase()
     } else {
@@ -84,6 +96,9 @@ class PasswordPolicy {
   }
 
   setAllowedNumbers(numbers) {
+    if (typeof numbers !== 'string') {
+      throw new Error('Parameter has to be string')
+    }
     if (numbers) {
       this.allowedNumbers = numbers
     } else {
@@ -92,6 +107,9 @@ class PasswordPolicy {
   }
 
   setAllowedSymbols(symbols) {
+    if (typeof symbols !== 'string') {
+      throw new Error('Parameter has to be string')
+    }
     if (symbols) {
       this.allowedSymbols = symbols
     } else {
@@ -100,6 +118,10 @@ class PasswordPolicy {
   }
 
   setMinimumTimeToCrack(days) {
+    if (typeof days !== 'number') {
+      throw new Error('Parameter has to be number')
+    }
+    days = Math.floor(days)
     if (days && days !== 0) {
       this.minimumTimeToCrack = days
       this.addValidator('minimalTimeToCrack', this.validateMinimalTimeToCrack)
@@ -110,6 +132,10 @@ class PasswordPolicy {
   }
 
   setMinimumNumberOfUpperLetters(numberOfUpperLetters) {
+    if (typeof days !== 'number') {
+      throw new Error('Parameter has to be number')
+    }
+    numberOfUpperLetters = Math.floor(numberOfUpperLetters)
     if (numberOfUpperLetters === 0) {
       this.minimumNumberOfUpperLetters = 0
       delete this.validators.minimumNumberOfUpperLetters
@@ -144,6 +170,9 @@ class PasswordPolicy {
   }
 
   checkSymbols(active) {
+    if (typeof active !== 'boolean') {
+      throw new Error('Parameter has to be boolean')
+    }
     if (active) {
       this.addValidator('allowedSymbols', this.validateSymbols)
     } else {
@@ -154,6 +183,9 @@ class PasswordPolicy {
   }
 
   checkLetters(active) {
+    if (typeof active !== 'boolean') {
+      throw new Error('Parameter has to be boolean')
+    }
     if (active) {
       this.addValidator('allowedLetters', this.validateLetters)
     } else {
@@ -164,6 +196,9 @@ class PasswordPolicy {
   }
 
   checkNumbers(active) {
+    if (typeof active !== 'boolean') {
+      throw new Error('Parameter has to be boolean')
+    }
     if (active) {
       this.addValidator('allowedNumbers', this.validateNumbers)
     } else {
