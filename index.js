@@ -122,6 +122,27 @@ class PasswordPolicy {
     }
   }
 
+  setDefaultPolicy(policy) {
+    this.checkLetters(true)
+    this.checkNumbers(true)
+    this.checkSymbols(true)
+
+    switch (policy) {
+      case 'user':
+        this.minimumNumberOfUpperLetters = 1
+        this.minimumTimeToCrack = 14
+        this.minimumLength = 10
+        this.allowedSymbols = this.specialSymbolsUser
+        break
+      case 'sip':
+        this.minimumLength = 8
+        this.allowedSymbols = this.specialSymbolsSip
+        break
+      default:
+        throw new Error(`Policy ${policy} is not allowed`)
+    }
+  }
+
   checkSymbols(active) {
     if (active) {
       this.addValidator('allowedSymbols', this.validateSymbols)
