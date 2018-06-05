@@ -232,7 +232,6 @@ class PasswordPolicy {
         actual: self.password.length
       }
     }
-    return null
   }
 
   validateMinimalNumberOfUpperLetters(self) {
@@ -246,7 +245,6 @@ class PasswordPolicy {
         actual: size
       }
     }
-    return null
   }
 
   validateMinimalTimeToCrack(self) {
@@ -258,7 +256,6 @@ class PasswordPolicy {
         actual: days
       }
     }
-    return null
   }
 
   validateSymbols(self) {
@@ -278,7 +275,6 @@ class PasswordPolicy {
         actual: size
       }
     }
-    return null
   }
 
   validateNumbers(self) {
@@ -302,7 +298,6 @@ class PasswordPolicy {
         actual: size
       }
     }
-    return null
   }
 
   validateLetters(self) {
@@ -326,7 +321,6 @@ class PasswordPolicy {
         actual: size
       }
     }
-    return null
   }
 
   get errors() {
