@@ -176,16 +176,16 @@ class PasswordPolicy {
   }
 
   validate(password = '') {
-    this.errors = []
+    this._errors = []
     this.password = password
     this.validators.forEach(validate => validate(this))
 
-    return !this.errors.length
+    return !this._errors.length
   }
 
   validateMinimalLength(self) {
     if (self.password.length < self._minimumLength) {
-      self.errors.push({
+      self._errors.push({
         validator: 'MinimalLength',
         expected: self._minimumLength,
         actual: self.password.length
@@ -195,7 +195,7 @@ class PasswordPolicy {
 
   validateMaximalLength(self) {
     if (self.password.length > self._maximumLength) {
-      self.errors.push({
+      self._errors.push({
         validator: 'MaximalLength',
         expected: self._maximumLength,
         actual: self.password.length
@@ -206,7 +206,7 @@ class PasswordPolicy {
   validateMinimalNumberOfUpperLetters(self) {
     const size = R.intersection(self._allowedUpperLetters, self.password).length
     if (size < self._minimumNumberOfUpperLetters) {
-      self.errors.push({
+      self._errors.push({
         validator: 'minimumNumberOfUpperLetters',
         expected: self._minimumNumberOfUpperLetters,
         actual: size
@@ -217,7 +217,7 @@ class PasswordPolicy {
   validateMinimalTimeToCrack(self) {
     const days = mellt.CheckPassword(self.password)
     if (days < self._minimumTimeToCrack) {
-      self.errors.push({
+      self._errors.push({
         validator: 'MinimumTimeToCrack',
         expected: self._minimumTimeToCrack,
         actual: days
@@ -236,7 +236,7 @@ class PasswordPolicy {
       .split('')
       .filter(letter => !self._allowedSymbols.includes(letter)).length
     if (size) {
-      self.errors.push({
+      self._errors.push({
         validator: 'Symbols',
         expected: 0,
         actual: size
@@ -259,7 +259,7 @@ class PasswordPolicy {
       .split('')
       .filter(digit => !self._allowedNumbers.includes(digit)).length
     if (size) {
-      self.errors.push({
+      self._errors.push({
         validator: 'Digits',
         expected: 0,
         actual: size
@@ -282,7 +282,7 @@ class PasswordPolicy {
       .split('')
       .filter(letter => !self.allowedLetters.includes(letter)).length
     if (size) {
-      self.errors.push({
+      self._errors.push({
         validator: 'Letters',
         expected: 0,
         actual: size
