@@ -48,11 +48,9 @@ class PasswordPolicy {
       throw new Error('Parameter has to be integer')
     }
     this._minimumLength = Math.floor(minimumLength)
-    if (this._minimumLength !== 0) {
-      this.validators.set('minimalLength', this.validateMinimalLength)
-      return
-    }
-    this.validators.delete('minimalLength')
+    this._minimumLength !== 0
+      ? this.validators.set('minimalLength', this.validateMinimalLength)
+      : this.validators.delete('minimalLength')
   }
 
   set maximumLength(maximumLength) {
@@ -60,12 +58,9 @@ class PasswordPolicy {
       throw new Error('Parameter has to be integer')
     }
     this._maximumLength = Math.floor(maximumLength)
-    if (this._maximumLength !== 0) {
-      this.validators.set('maximalLength', this.validateMaximalLength)
-      return
-    }
-
-    this.valiadors.delete('maximalLength')
+    this._maximumLength !== 0
+      ? this.validators.set('maximalLength', this.validateMaximalLength)
+      : this.valiadors.delete('maximalLength')
   }
 
   set allowedUpperLetter(upperLetters) {
@@ -107,12 +102,12 @@ class PasswordPolicy {
       throw new Error('Parameter has to be number')
     }
     this._minimumTimeToCrack = Math.floor(days)
-    if (this._minimumTimeToCrack !== 0) {
-      this.validators.set('minimalTimeToCrack', this.validateMinimalTimeToCrack)
-      return
-    }
-
-    this.validators.delete('minimalTimeToCrack')
+    this._minimumTimeToCrack !== 0
+      ? this.validators.set(
+        'minimalTimeToCrack',
+        this.validateMinimalTimeToCrack
+      )
+      : this.validators.delete('minimalTimeToCrack')
   }
 
   set minimumNumberOfUpperLetters(numberOfUpperLetters) {
@@ -120,14 +115,12 @@ class PasswordPolicy {
       throw new Error('Parameter has to be number')
     }
     this._minimumNumberOfUpperLetters = Math.floor(numberOfUpperLetters)
-    if (this._minimumNumberOfUpperLetters !== 0) {
-      this.validators.set(
+    this._minimumNumberOfUpperLetters !== 0
+      ? this.validators.set(
         'minimalNumberOfUpperLetters',
         this.validateMinimalNumberOfUpperLetters
       )
-      return
-    }
-    this.validators.delete('minimalNumberOfUpperLetters')
+      : this.validators.delete('minimalNumberOfUpperLetters')
   }
 
   set defaultPolicy(policy) {
@@ -159,42 +152,32 @@ class PasswordPolicy {
     if (typeof active !== 'boolean') {
       throw new Error('Parameter has to be boolean')
     }
-    if (active) {
-      this.validators.set('allowedSymbols', this.validateSymbols)
-      return
-    }
-    this.validators.delete('allowedSymbols')
+    active
+      ? this.validators.set('allowedSymbols', this.validateSymbols)
+      : this.validators.delete('allowedSymbols')
   }
 
   checkLetters(active) {
     if (typeof active !== 'boolean') {
       throw new Error('Parameter has to be boolean')
     }
-    if (active) {
-      this.validators.set('allowedLetters', this.validateLetters)
-      return
-    }
-
-    this.valiadors.delete('allowedLetters')
+    active
+      ? this.validators.set('allowedLetters', this.validateLetters)
+      : this.valiadors.delete('allowedLetters')
   }
 
   checkNumbers(active) {
     if (typeof active !== 'boolean') {
       throw new Error('Parameter has to be boolean')
     }
-    if (active) {
-      this.validators.set('allowedNumbers', this.validateNumbers)
-      return
-    }
-
-    this.valiadors.delete('allowedNumbers')
+    active
+      ? this.validators.set('allowedNumbers', this.validateNumbers)
+      : this.valiadors.delete('allowedNumbers')
   }
 
   validate(password) {
     this.password = password || ''
-    this.validators.forEach((value, key) => {
-      value(this)
-    })
+    this.validators.forEach(validate => validate(this))
 
     return !this.errors.length
   }
@@ -220,9 +203,7 @@ class PasswordPolicy {
   }
 
   validateMinimalNumberOfUpperLetters(self) {
-    const size = self._allowedUpperLetters
-      .split('')
-      .filter(letter => self.password.includes(letter))
+    const size = R.intersection(self._allowedUpperLetters, self.password).length
     if (size.length < self._minimumNumberOfUpperLetters) {
       self.errors.push({
         validator: 'minimumNumberOfUpperLetters',
