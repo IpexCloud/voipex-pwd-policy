@@ -60,7 +60,7 @@ describe(`Test of validators`, () => {
 
   it(`minimal time to crack - incorrect`, () => {
     const policy = new PasswordPolicy()
-    policy.minimumNumberOfUpperLetters = 3
+    policy.minimumTimeToCrack = 3
     const actual = policy.validate('a')
     const expected = false
     assert.equal(actual, expected)
@@ -119,6 +119,14 @@ describe(`Test of validators`, () => {
     policy.checkLetters(true)
     const actual = policy.validate('x-0-x')
     const expected = false
+    assert.equal(actual, expected)
+  })
+
+  it(`default user - correct`, () => {
+    const policy = new PasswordPolicy()
+    policy.defaultPolicy = 'user'
+    const actual = policy.validate('AbrakaDabra123')
+    const expected = true
     assert.equal(actual, expected)
   })
 })

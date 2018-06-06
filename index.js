@@ -176,6 +176,7 @@ class PasswordPolicy {
   }
 
   validate(password = '') {
+    this.password = password
     this.validators.forEach(validate => validate(this))
 
     return !this.errors.length
@@ -203,7 +204,7 @@ class PasswordPolicy {
 
   validateMinimalNumberOfUpperLetters(self) {
     const size = R.intersection(self._allowedUpperLetters, self.password).length
-    if (size.length < self._minimumNumberOfUpperLetters) {
+    if (size < self._minimumNumberOfUpperLetters) {
       self.errors.push({
         validator: 'minimumNumberOfUpperLetters',
         expected: self._minimumNumberOfUpperLetters,
