@@ -1,193 +1,291 @@
-const Checker = require('password-checker')
-const defaultMellt = require('./src/mellt.js')
+const R = require('ramda')
+
+const trees = require('./src/trees.mod.js')
+const words = require('./src/norvig-10000.mod.js')
+const names = require('./src/all-names.mod.js')
+const passwords = require('./src/passwords-10000.mod.js')
+const mellt = require('./src/mellt.js')
+
+RegExp.escape = function(string) {
+  return string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')
+}
 
 class PasswordPolicy {
-  constructor(checker = new Checker(), mellt = defaultMellt) {
-    this.lowerLetters = 'abcdefghijklmnopqrstuvwxyz'
-    this.upperLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+  constructor() {
+    const self = this
+    this.symbols = '_-!"?$%^&*()+={}[]:;@\'~#|<>,.?\\/ '
+    this.letters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    this.digits = '0123456789'
+    this.words = words
+    this.names = names
+    this.passwords = passwords
+    this.wordsTree = trees.arrayToTree(this.words, true, 3)
+    this.namesTree = trees.arrayToTree(this.names, true, 3)
+    this.passwordsTree = trees.arrayToTree(this.passwords, true, 3)
+    // Holds errors from the last check
+    this._errors = []
+    this.password = null
+    this.validators = new Map()
+    // Defaults
+    this._allowedLowerLetters = 'abcdefghijklmnopqrstuvwxyz'
+    this._allowedUpperLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    this.allowedLetters = this._allowedLowerLetters + this._allowedUpperLetters
+    this._allowedNumbers = '0123456789'
+    this._allowedSymbols = '_-!"?$%^&*()+={}[]:;@\'~#|<>,.?\\/ '
+
+    this._minimumLength = 0
+    this._maximumLength = 0
+
     this.specialSymbolsUser = ',.!#@*'
     this.specialSymbolsSip = '-.*()%'
-    this.penetration = '.*'
-    this.checker = checker
-    this.mellt = mellt
-    this.minTimeToCrack = 0
-    this.checker.allowed_symbols = '_-!"?$%^&*()+={}[]:;@\'~#|<>,.?\\/ '
-    this.checker.min_length = 0
-    this.checker.max_length = 0
-    this.upper = 0
+    this.specialSymbolsPenetration = '.*'
+    this._minimumTimeToCrack = 0
+    this._minimumNumberOfUpperLetters = 0
   }
 
-  /**
-   * Set minimal password length
-   * @param {number} length
-   */
-  setMinLength(length) {
-    this.checker.min_length = length
+  set minimumLength(minimumLength) {
+    if (typeof minimumLength !== 'number') {
+      throw new Error('Parameter has to be integer')
+    }
+    this._minimumLength = Math.floor(minimumLength)
+    this._minimumLength !== 0
+      ? this.validators.set('minimalLength', this.validateMinimalLength)
+      : this.validators.delete('minimalLength')
   }
 
-  /**
-   * Set maximal password length
-   * @param {number} length
-   */
-  setMaxLength(length) {
-    this.checker.max_length = length
+  set maximumLength(maximumLength) {
+    if (typeof maximumLength !== 'number') {
+      throw new Error('Parameter has to be integer')
+    }
+    this._maximumLength = Math.floor(maximumLength)
+    this._maximumLength !== 0
+      ? this.validators.set('maximalLength', this.validateMaximalLength)
+      : this.valiadors.delete('maximalLength')
   }
 
-  /**
-   * Set allowed letters password can contain
-   * @param {string} letters
-   */
-  setAllowedLetters(upperLetters = '', lowerLetters = '') {
-    this.lowerLetters = lowerLetters
-    this.upperLetters = upperLetters
-    this.checker.allowed_letters = this.upperLetters + this.lowerLetters
+  set allowedUpperLetter(upperLetters) {
+    if (typeof upperLetters !== 'string') {
+      throw new Error('Parameter has to be string')
+    }
+
+    this._allowedUpperLetters = upperLetters.toUpperCase()
+    this.allowedLetters = this._allowedLowerLetters + this._allowedUpperLetters
   }
 
-  /**
-   * Set allowed numbers password can contain
-   * @param {string} numbers
-   */
-  setAllowedNumbers(numbers) {
-    this.checker.allowed_numbers = numbers
+  set allowedLowerLetter(lowerLetters) {
+    if (typeof lowerLetters !== 'string') {
+      throw new Error('Parameter has to be string')
+    }
+
+    this._allowedLowerLetters = lowerLetters.toLowerCase()
+    this.allowedLetters = this._allowedLowerLetters + this._allowedUpperLetters
   }
 
-  /**
-   * Set allowed symbols password can contain
-   * @param {string} symbols
-   */
-  setAllowedSpecialSymbols(symbols) {
-    this.checker.allowed_symbols = symbols
+  set allowedNumbers(numbers) {
+    if (typeof numbers !== 'string') {
+      throw new Error('Parameter has to be string')
+    }
+
+    this._allowedNumbers = numbers
   }
 
-  /**
-   * Should check that the password only has letters from allowed_letters in it
-   * @param  {boolean} active true|false
-   */
-  checkLetters(active) {
-    this.checker.checkLetters(active)
+  set allowedSymbols(symbols) {
+    if (typeof symbols !== 'string') {
+      throw new Error('Parameter has to be string')
+    }
+
+    this._allowedSymbols = symbols
   }
 
-  /**
-   * Should check that the password has letter in it
-   * @param  {boolean} active true|false
-   */
-  requireLetters(active) {
-    this.checker.requireLetters(active)
+  set minimumTimeToCrack(days) {
+    if (typeof days !== 'number') {
+      throw new Error('Parameter has to be number')
+    }
+    this._minimumTimeToCrack = Math.floor(days)
+    this._minimumTimeToCrack !== 0
+      ? this.validators.set(
+        'minimalTimeToCrack',
+        this.validateMinimalTimeToCrack
+      )
+      : this.validators.delete('minimalTimeToCrack')
   }
 
-  /**
-   * Should check that the password only has numbers from allowed_numbers in it
-   * @param  {boolean} active true|false
-   */
-  checkNumbers(active) {
-    this.checker.checkNumbers(active)
+  set minimumNumberOfUpperLetters(numberOfUpperLetters) {
+    if (typeof numberOfUpperLetters !== 'number') {
+      throw new Error('Parameter has to be number')
+    }
+    this._minimumNumberOfUpperLetters = Math.floor(numberOfUpperLetters)
+    this._minimumNumberOfUpperLetters !== 0
+      ? this.validators.set(
+        'minimalNumberOfUpperLetters',
+        this.validateMinimalNumberOfUpperLetters
+      )
+      : this.validators.delete('minimalNumberOfUpperLetters')
   }
 
-  /**
-   * Should check that the password has numbers in it
-   * @param  {boolean} active true|false
-   */
-  requireNumbers(active) {
-    this.checker.requireNumbers(active)
-  }
-
-  /**
-   * Should check that the password only has symbols from allowed_letters in it
-   * @param  {boolean} active true|false
-   */
-  checkSymbols(active) {
-    this.checker.checkSymbols(active)
-  }
-
-  /**
-   * Should check that the password has symbols in it
-   * @param  {boolean} active true|false
-   */
-  requireSymbols(active) {
-    this.checker.requireSymbols(active)
-  }
-  /**
-   * Minimal number of day days password to be cracked
-   * @param  {number} days
-   */
-  setMinTimeToCrack(days) {
-    this.minTimeToCrack = days
-  }
-
-  /**
-   * Minimal number of upper letters
-   * @param  {number} length
-   */
-  setUpper(length) {
-    this.upper = length
-  }
-
-  /**
-   * Which default policy to set
-   * @param  {string} policy user | sip
-   */
-  setDefaultPolicy(policy) {
-    this.checker.requireLetters(true)
-    this.checker.requireNumbers(false)
-    this.checker.requireSymbols(false)
-    this.checker.checkLetters(true)
-    this.checker.checkNumbers(true)
-    this.checker.checkSymbols(true)
-    this.upper = 1
+  set defaultPolicy(policy) {
+    this.checkLetters(true)
+    this.checkNumbers(true)
+    this.checkSymbols(true)
 
     switch (policy) {
       case 'user':
-        this.upper = 1
-        this.minTimeToCrack = 14
-        this.checker.min_length = 10
-        this.checker.allowed_symbols = this.specialSymbolsUser
+        this._minimumNumberOfUpperLetters = 1
+        this._minimumTimeToCrack = 14
+        this._minimumLength = 10
+        this._allowedSymbols = this.specialSymbolsUser
         break
       case 'sip':
-        this.checker.min_length = 8
-        this.checker.allowed_symbols = this.specialSymbolsSip
+        this._minimumLength = 8
+        this._allowedSymbols = this.specialSymbolsSip
         break
       default:
         throw new Error(`Policy ${policy} is not allowed`)
     }
   }
 
-  check(password, cb) {
-    this.errors = []
-    this.password = password
+  get errors() {
+    return this._errors
+  }
 
-    const result = this.checker.check(password)
-    if (!result) {
-      this.errors.push(new Error(''))
+  checkSymbols(active) {
+    if (typeof active !== 'boolean') {
+      throw new Error('Parameter has to be boolean')
     }
+    active
+      ? this.validators.set('allowedSymbols', this.validateSymbols)
+      : this.validators.delete('allowedSymbols')
+  }
 
-    if (this.upper) {
-      const size = this.upperLetters
-        .split('')
-        .filter(letter => password.includes(letter))
-      if (this.upper >= size) {
-        this.errors.push(
-          new Error(
-            `Password does not contain required number of upper letters (${
-              this.upper
-            })`
-          )
-        )
-      }
+  checkLetters(active) {
+    if (typeof active !== 'boolean') {
+      throw new Error('Parameter has to be boolean')
     }
+    active
+      ? this.validators.set('allowedLetters', this.validateLetters)
+      : this.valiadors.delete('allowedLetters')
+  }
 
-    if (
-      this.minTimeToCrack &&
-      this.mellt.CheckPassword(password) < this.minTimeToCrack
-    ) {
-      this.errors.push(
-        new Error(`Password can be cracked sooner than ${this.minTimeToCrack}`)
-      )
+  checkNumbers(active) {
+    if (typeof active !== 'boolean') {
+      throw new Error('Parameter has to be boolean')
     }
+    active
+      ? this.validators.set('allowedNumbers', this.validateNumbers)
+      : this.valiadors.delete('allowedNumbers')
+  }
 
-    if (cb) {
-      cb(this.errors.length ? this.errors : null)
-    }
+  validate(password = '') {
+    this.validators.forEach(validate => validate(this))
+
     return !this.errors.length
+  }
+
+  validateMinimalLength(self) {
+    if (self.password.length < self._minimumLength) {
+      self.errors.push({
+        validator: 'MinimalLength',
+        expected: self._minimumLength,
+        actual: self.password.length
+      })
+    }
+  }
+
+  validateMaximalLength(self) {
+    if (self.password.length > self._maximumLength) {
+      self.errors.push({
+        validator: 'MaximalLength',
+        expected: self._maximumLength,
+        actual: self.password.length
+      })
+    }
+  }
+
+  validateMinimalNumberOfUpperLetters(self) {
+    const size = R.intersection(self._allowedUpperLetters, self.password).length
+    if (size.length < self._minimumNumberOfUpperLetters) {
+      self.errors.push({
+        validator: 'minimumNumberOfUpperLetters',
+        expected: self._minimumNumberOfUpperLetters,
+        actual: size
+      })
+    }
+  }
+
+  validateMinimalTimeToCrack(self) {
+    const days = mellt.CheckPassword(self.password)
+    if (days < self._minimumTimeToCrack) {
+      self.errors.push({
+        validator: 'MinimumTimeToCrac',
+        expected: self._minimumTimeToCrack,
+        actual: days
+      })
+    }
+  }
+
+  validateSymbols(self) {
+    let string = R.replace(
+      new RegExp('[' + self.letters + ']', 'g'),
+      '',
+      self.password
+    )
+    string = R.replace(new RegExp('[' + self.digits + ']', 'g'), '', string)
+    const size = string
+      .split('')
+      .filter(letter => !self._allowedSymbols.includes(letter)).length
+    if (size) {
+      self.errors.push({
+        validator: 'Symbols',
+        expected: 0,
+        actual: size
+      })
+    }
+  }
+
+  validateNumbers(self) {
+    let string = R.replace(
+      new RegExp('[' + self.letters + ']', 'g'),
+      '',
+      self.password
+    )
+    string = R.replace(
+      new RegExp('[' + RegExp.escape(self.symbols) + ']', 'g'),
+      '',
+      string
+    )
+    const size = string
+      .split('')
+      .filter(digit => !self._allowedNumbers.includes(digit)).length
+    if (size) {
+      self.errors.push({
+        validator: 'Digits',
+        expected: 0,
+        actual: size
+      })
+    }
+  }
+
+  validateLetters(self) {
+    let string = R.replace(
+      new RegExp('[' + self.digits + ']', 'g'),
+      '',
+      self.password
+    )
+    string = R.replace(
+      new RegExp('[' + RegExp.escape(self.symbols) + ']', 'g'),
+      '',
+      string
+    )
+    const size = string
+      .split('')
+      .filter(letter => !self.allowedLetters.includes(letter)).length
+    if (size) {
+      self.errors.push({
+        validator: 'Letters',
+        expected: 0,
+        actual: size
+      })
+    }
   }
 }
 
