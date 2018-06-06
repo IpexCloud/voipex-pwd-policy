@@ -1,6 +1,6 @@
 {
   "name": "voipex-password-policy",
-  "version": "0.9.3",
+  "version": "0.9.5",
   "description": "VOIPEX password policy checker",
   "main": "index.js",
   "scripts": {
