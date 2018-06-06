@@ -173,6 +173,6 @@ Validate given password on setted rules
 const PasswordPolicy = require('voipex-password-policy')
 
 const policy = new PasswordPolicy()
-policy.setDefaultPolicy('user')
-policy.check('password')
+policy.defaultPolicy = 'user'
+policy.validate('password')
 ```
