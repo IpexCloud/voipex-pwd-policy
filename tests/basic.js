@@ -129,4 +129,12 @@ describe(`Test of validators`, () => {
     const expected = true
     assert.equal(actual, expected)
   })
+
+  it(`default user - incorrect`, () => {
+    const policy = new PasswordPolicy()
+    policy.defaultPolicy = 'user'
+    const actual = policy.validate('a')
+    const expected = false
+    assert.equal(actual, expected)
+  })
 })
