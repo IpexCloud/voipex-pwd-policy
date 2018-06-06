@@ -125,7 +125,20 @@ Minimal count of upper letters in password to be valid
   - when value is 0 validator is not used
 
 ```
-policy.numberOfUpperLetters = 1
+policy.minimumNumberOfUpperLetters = 1
+```
+### minimumNumberOfDigits (int)
+
+Minimal count of digits in password to be valid
+
+#### Parameters
+
+- numberOfDigits
+  - default value: 0
+  - when value is 0 validator is not used
+
+```
+policy.minimumNumberOfDigits = 1
 ```
 
 ## Getters

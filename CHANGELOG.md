@@ -1,4 +1,4 @@
-## 2018-06-05 [0.9.0]
+## 2018-06-06 [0.9.5]
 ### Added
 - Full documentation
 - Changelog

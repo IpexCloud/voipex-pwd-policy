@@ -123,6 +123,19 @@ class PasswordPolicy {
       : this.validators.delete('minimalNumberOfUpperLetters')
   }
 
+  set minimumNumberOfDigits(numberOfDigits) {
+    if (typeof numberOfDigits !== 'number') {
+      throw new Error('Parameter has to be number')
+    }
+    this._minimumNumberOfDigits = Math.floor(numberOfDigits)
+    this._minimumNumberOfDigits !== 0
+      ? this.validators.set(
+        'minimumNumberOfDigits',
+        this.validateMinimalNumberOfDigits
+      )
+      : this.validators.delete('minimumNumberOfDigits')
+  }
+
   set defaultPolicy(policy) {
     this.checkLetters(true)
     this.checkNumbers(true)
@@ -134,8 +147,10 @@ class PasswordPolicy {
         this.minimumTimeToCrack = 14
         this.minimumLength = 10
         this.allowedSymbols = this.specialSymbolsUser
+        this.minimumNumberOfDigits = 1
         break
       case 'sip':
+        this.minimumNumberOfUpperLetters = 1
         this.minimumLength = 8
         this.allowedSymbols = this.specialSymbolsSip
         break
@@ -209,6 +224,17 @@ class PasswordPolicy {
       self._errors.push({
         validator: 'minimumNumberOfUpperLetters',
         expected: self._minimumNumberOfUpperLetters,
+        actual: size
+      })
+    }
+  }
+
+  validateMinimalNumberOfDigits(self) {
+    const size = R.intersection(self._allowedNumbers, self.password).length
+    if (size < self._minimumNumberOfDigits) {
+      self._errors.push({
+        validator: 'minimumNumberOfDigits',
+        expected: self._minimumNumberOfDigits,
         actual: size
       })
     }
