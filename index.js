@@ -175,8 +175,7 @@ class PasswordPolicy {
       : this.valiadors.delete('allowedNumbers')
   }
 
-  validate(password) {
-    this.password = password || ''
+  validate(password = '') {
     this.validators.forEach(validate => validate(this))
 
     return !this.errors.length
