@@ -130,14 +130,14 @@ class PasswordPolicy {
 
     switch (policy) {
       case 'user':
-        this._minimumNumberOfUpperLetters = 1
-        this._minimumTimeToCrack = 14
-        this._minimumLength = 10
-        this._allowedSymbols = this.specialSymbolsUser
+        this.minimumNumberOfUpperLetters = 1
+        this.minimumTimeToCrack = 14
+        this.minimumLength = 10
+        this.allowedSymbols = this.specialSymbolsUser
         break
       case 'sip':
-        this._minimumLength = 8
-        this._allowedSymbols = this.specialSymbolsSip
+        this.minimumLength = 8
+        this.allowedSymbols = this.specialSymbolsSip
         break
       default:
         throw new Error(`Policy ${policy} is not allowed`)
