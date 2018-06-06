@@ -176,6 +176,7 @@ class PasswordPolicy {
   }
 
   validate(password = '') {
+    this.errors = []
     this.password = password
     this.validators.forEach(validate => validate(this))
 
@@ -217,7 +218,7 @@ class PasswordPolicy {
     const days = mellt.CheckPassword(self.password)
     if (days < self._minimumTimeToCrack) {
       self.errors.push({
-        validator: 'MinimumTimeToCrac',
+        validator: 'MinimumTimeToCrack',
         expected: self._minimumTimeToCrack,
         actual: days
       })
