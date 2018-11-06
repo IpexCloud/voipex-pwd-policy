@@ -1,10 +1,10 @@
 const R = require('ramda')
 
-const trees = require('./src/trees.mod.js')
-const words = require('./src/norvig-10000.mod.js')
-const names = require('./src/all-names.mod.js')
-const passwords = require('./src/passwords-10000.mod.js')
-const mellt = require('./src/mellt.js')
+const trees = require('./trees.mod.js')
+const words = require('./norvig-10000.mod.js')
+const names = require('./all-names.mod.js')
+const passwords = require('./passwords-10000.mod.js')
+const mellt = require('./mellt.js')
 
 RegExp.escape = function(string) {
   return string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')
